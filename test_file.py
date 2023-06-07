@@ -1,62 +1,42 @@
-"""Driver Laptimes Scatterplot
+"""Qualifying results overview
 ==============================
 
-Plot a driver's lap times in a race, with color coding for the compounds.
+Plot the qualifying result with visualization the fastest times.
 """
+
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from timple.timedelta import strftimedelta
 
 import fastf1
 import fastf1.plotting
-import seaborn as sns
-from matplotlib import pyplot as plt
-from matplotlib.colors import to_rgba
+from fastf1.core import Laps
 
-# The misc_mpl_mods option enables minor grid lines which clutter the plot
-fastf1.plotting.setup_mpl(misc_mpl_mods=False)
 
-###############################################################################
-# Load the race session.
+# we only want support for timedelta plotting in this example
+fastf1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme=None, misc_mpl_mods=False)
 
-race = fastf1.get_session(2023, "Azerbaijan", 'R')
-race.load()
+session = fastf1.get_session(2021, 'Spanish Grand Prix', 'Q')
+session.load()
 
-###############################################################################
-# Get all the laps for a single driver.
-# Filter out slow laps as they distort the graph axis.
 
-driver_laps = race.laps.pick_driver("ALO").pick_quicklaps().reset_index()
+##############################################################################
+# First, we need to get an array of all drivers.
 
-###############################################################################
-# Make the scattterplot using lap number as x-axis and lap time as y-axis.
-# Marker colors correspond to the compounds used.
-# Note: as LapTime is represented by timedelta, calling setup_mpl earlier
-# is required.
-compound_colors = [to_rgba(c) for c in driver_laps['Compound']]
-fig, ax = plt.subplots(figsize=(8, 8))
+drivers = pd.unique(session.laps['Driver'])
+print(drivers)
 
-sns.scatterplot(data=driver_laps,
-                x="LapNumber",
-                y="LapTime",
-                ax=ax,
-                hue=compound_colors,
-                palette=fastf1.plotting.COMPOUND_COLORS,
-                s=80,
-                linewidth=0,
-                legend='auto')
-# sphinx_gallery_defer_figures
 
-###############################################################################
-# Make the plot more aesthetic.
-ax.set_xlabel("Lap Number")
-ax.set_ylabel("Lap Time")
+##############################################################################
+# After that we'll get each drivers fastest lap, create a new laps object
+# from these laps, sort them by lap time and have pandas reindex them to
+# number them nicely by starting position.
 
-# The y-axis increases from bottom to top by default
-# Since we are plotting time, it makes sense to invert the axis
-ax.invert_yaxis()
-plt.suptitle("Alonso Laptimes in the 2023 Azerbaijan Grand Prix")
-
-# Turn on major grid lines
-plt.grid(color='w', which='major', axis='both')
-sns.despine(left=True, bottom=True)
-
-plt.tight_layout()
-plt.show()
+list_fastest_laps = list()
+for drv in drivers:
+    drvs_fastest_lap = session.laps.pick_driver(drv).pick_fastest()
+    list_fastest_laps.append(drvs_fastest_lap)
+    
+print(list_fastest_laps[0]["LapTime"])
+fastest_laps = Laps(list_fastest_laps).sort_values(by='LapTime').reset_index(drop=True)

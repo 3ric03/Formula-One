@@ -33,9 +33,9 @@ while not exit:
             
         if not bad_search:
             load_race_event(searched_event)
-            print("1. View Race Laptimes")
+            print("\n1. View Race Laptimes")
             print("2. Compare Race Laptimes")
-            print("3. View Quali Result")
+            print("3. Q3 Hotlaps")
             
             command2 = int(input("Enter command: "))
             inner_menu(command2, searched_event)
