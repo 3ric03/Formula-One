@@ -9,6 +9,9 @@ from fastf1.core import Lap
 import pandas as pd
 from timple.timedelta import strftimedelta
 
+font1 = {'family':'serif','color':'black','size':17}
+font2 = {'family':'serif','color':'white','size':17}
+ 
 def load_race_event (searched_event):
     race = searched_event.get_race()
     quali = searched_event.get_qualifying()
@@ -43,7 +46,7 @@ def plot_driver_race_laptime (race, driver):
     fastf1.plotting.setup_mpl(misc_mpl_mods=False)
     wet = is_wet(race, driver)
     
-    if wet:
+    if not wet:
         laps = race.laps.pick_driver(driver).pick_quicklaps(1.08).reset_index()
     else:
         laps = race.laps.pick_driver(driver).pick_quicklaps(1.40).reset_index()
@@ -76,19 +79,22 @@ def plot_driver_race_laptime (race, driver):
     
     
 def plot_laptimes_comparison (race, driver1, driver2):
+    driver_1_name = race.get_driver(driver1)["LastName"]
+    driver_2_name = race.get_driver(driver2)["LastName"]
+    
     wet = False
     wet = is_wet(race, driver1)
     fastf1.plotting.setup_mpl(misc_mpl_mods=False)
     
-    if wet:
+    if not wet:
         laps1 = race.laps.pick_driver(driver1).pick_quicklaps(1.08).reset_index()
         laps2 = race.laps.pick_driver(driver2).pick_quicklaps(1.08).reset_index()
     else:
         laps1 = race.laps.pick_driver(driver1).pick_quicklaps(1.40).reset_index()
         laps2 = race.laps.pick_driver(driver2).pick_quicklaps(1.40).reset_index()
-        
-    print(laps1.head(5))
-    fig, ax = plt.subplots(figsize=(8, 8))
+        print("wet")
+ 
+    
     
     lap_list1 = list()
     lap_list2 = list()
@@ -98,28 +104,48 @@ def plot_laptimes_comparison (race, driver1, driver2):
     for lap in laps2.iterlaps():
         lap_list2.append(lap[1])
     
-    lap_df_1 = pd.concat(lap_list1)
-    lap_df_2 = pd.concat(lap_list2)
-    
-    merge_list = [lap_df_1, lap_df_2] #lap dataframe for driver 1 and driver 2
-    merge_df = pd.concat(merge_list) #merge into one dataframe
+    lap_1_df = Laps(lap_list1)
+    lap_2_df = Laps(lap_list2)
     
     fig, ax = plt.subplots(figsize=(8, 8))
-    print(type(merge_df))
-    sns.scatterplot(data=merge_df,
+    color_1 = "red"
+    color_2 = "blue"
+    plt.title(f"{race.event.year} {race.event['EventName']} Lap Time Comparison\n"
+             f"{driver_1_name} vs {driver_2_name}", fontdict=font2)
+    sns.scatterplot(data=lap_1_df,
                 x="LapNumber",
                 y="LapTime",
                 ax=ax,
                 linewidth=0,
-                legend='auto')
+                s=80,
+                legend='auto',
+                color=color_1,
+                label= driver_1_name)
+    sns.scatterplot(data=lap_2_df,
+                x="LapNumber",
+                y="LapTime",
+                ax=ax,
+                linewidth=0,
+                s=80,
+                legend='auto',
+                color=color_2,
+                label= driver_2_name)
 
+    ax.invert_yaxis()
+    #sub_title = race.get_driver(driver)["LastName"] + " laptimes, " + race.event["OfficialEventName"]
+    #plt.suptitle(sub_title)
 
+    # Turn on major grid lines
+    plt.grid(color='w', which='major', axis='both')
+    sns.despine(left=True, bottom=True)
+
+    plt.tight_layout()
+    
     plt.show()
     
 def plot_q3_flying_laps(quali):
     fastf1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme=None, misc_mpl_mods=False)
     
-    font1 = {'family':'serif','color':'black','size':17}
     q1, q2, q3 = quali.laps.split_qualifying_sessions()
     pole = quali.laps.pick_fastest()["LapTime"]
     top_drivers = quali.drivers[:6] #change back to 8
