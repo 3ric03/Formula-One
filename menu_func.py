@@ -3,15 +3,21 @@ from format_time import format_time_delta
 import fastf1
 import fastf1.plotting
 import seaborn as sns
+import matplotlib as mlt
 from matplotlib import pyplot as plt
 from fastf1.core import Laps
 from fastf1.core import Lap
 import pandas as pd
 from timple.timedelta import strftimedelta
+from matplotlib.lines import Line2D
 
-font1 = {'family':'serif','color':'black','size':17}
-font2 = {'family':'serif','color':'white','size':17}
- 
+title_font_white = {'family':'serif','color':'black','size':17}
+title_font_black = {'family':'serif','color':'white','size':17}
+red = "red"
+blue = "blue"
+mlt.rcParams['figure.facecolor'] = 'black'
+
+
 def load_race_event (searched_event):
     race = searched_event.get_race()
     quali = searched_event.get_qualifying()
@@ -81,6 +87,8 @@ def plot_driver_race_laptime (race, driver):
 def plot_laptimes_comparison (race, driver1, driver2):
     driver_1_name = race.get_driver(driver1)["LastName"]
     driver_2_name = race.get_driver(driver2)["LastName"]
+    driver_1_colour = fastf1.plotting.driver_color(driver_1_name)
+    driver_2_colour = fastf1.plotting.driver_color(driver_2_name)
     
     wet = False
     wet = is_wet(race, driver1)
@@ -92,10 +100,8 @@ def plot_laptimes_comparison (race, driver1, driver2):
     else:
         laps1 = race.laps.pick_driver(driver1).pick_quicklaps(1.40).reset_index()
         laps2 = race.laps.pick_driver(driver2).pick_quicklaps(1.40).reset_index()
-        print("wet")
  
-    
-    
+
     lap_list1 = list()
     lap_list2 = list()
     
@@ -108,10 +114,9 @@ def plot_laptimes_comparison (race, driver1, driver2):
     lap_2_df = Laps(lap_list2)
     
     fig, ax = plt.subplots(figsize=(8, 8))
-    color_1 = "red"
-    color_2 = "blue"
+   
     plt.title(f"{race.event.year} {race.event['EventName']} Lap Time Comparison\n"
-             f"{driver_1_name} vs {driver_2_name}", fontdict=font2)
+             f"{driver_1_name} vs {driver_2_name}", fontdict=title_font_black)
     sns.scatterplot(data=lap_1_df,
                 x="LapNumber",
                 y="LapTime",
@@ -119,7 +124,7 @@ def plot_laptimes_comparison (race, driver1, driver2):
                 linewidth=0,
                 s=80,
                 legend='auto',
-                color=color_1,
+                color=driver_1_colour,
                 label= driver_1_name)
     sns.scatterplot(data=lap_2_df,
                 x="LapNumber",
@@ -128,14 +133,11 @@ def plot_laptimes_comparison (race, driver1, driver2):
                 linewidth=0,
                 s=80,
                 legend='auto',
-                color=color_2,
+                color=driver_2_colour,
                 label= driver_2_name)
 
     ax.invert_yaxis()
-    #sub_title = race.get_driver(driver)["LastName"] + " laptimes, " + race.event["OfficialEventName"]
-    #plt.suptitle(sub_title)
-
-    # Turn on major grid lines
+ 
     plt.grid(color='w', which='major', axis='both')
     sns.despine(left=True, bottom=True)
 
@@ -186,7 +188,7 @@ def plot_q3_flying_laps(quali):
     pole_time = strftimedelta(pole_lap['LapTime'], '%m:%s.%ms')
 
     plt.title(f"{quali.event['EventName']} {quali.event.year} Qualifying\n"
-             f"Pole Lap Time: {pole_time} ({pole_lap['Driver']})", fontdict=font1)
+             f"Pole Lap Time: {pole_time} ({pole_lap['Driver']})", fontdict=title_font_white)
     
     plt.xlabel("Time Delta (Seconds)")
     plt.ylabel("Flying Laps")
@@ -198,26 +200,82 @@ def plot_q3_flying_laps(quali):
         plt.text(value, i, " +" + str(value), ha='left', va='center')
 
     plt.show()
-   
 
+def plot_telemetry_data(session, driver1, driver2):
+    driver_1_name = session.get_driver(driver1)["LastName"]
+    driver_2_name = session.get_driver(driver2)["LastName"]
     
+    driver_1_colour = fastf1.plotting.driver_color(driver_1_name)
+    driver_2_colour = fastf1.plotting.driver_color(driver_2_name)
+    
+    driver_1_laps = session.laps.pick_driver(driver1).pick_fastest()
+    driver_2_laps = session.laps.pick_driver(driver2).pick_fastest() 
+    
+    driver_1_tele = driver_1_laps.get_car_data().add_distance()
+    driver_2_tele = driver_2_laps.get_car_data().add_distance()
+    
+    fig, ax = plt.subplots(nrows=3)
+    
+    for axis in ax:
+        axis.set_facecolor('k')
+         # Set the tick colors to white
+        axis.tick_params(axis='x', colors='white')
+        axis.tick_params(axis='y', colors='white')
+
+        # Set the axis lines color to white
+        axis.spines['left'].set_color('white')
+        axis.spines['bottom'].set_color('white')
+    
+    legend_handles = [Line2D([0], [0], color=driver_1_colour, label=driver_1_name + " " + str(format_laptime(driver_1_laps["LapTime"]))),
+                  Line2D([0], [0], color=driver_2_colour, label=driver_2_name + " " + str(format_laptime(driver_2_laps["LapTime"])))]
+    ax[2].legend(handles=legend_handles)
+    
+    
+    ax[0].plot(driver_1_tele['Distance'], driver_1_tele['Speed'], color = driver_1_colour, label = driver_1_name)
+    ax[0].plot(driver_2_tele['Distance'], driver_2_tele['Speed'], color = driver_2_colour, label = driver_2_name)
+    
+    ax[0].set_ylabel('Speed in km/h', color = "white")
+    ax[0].set_title(f"{session.event.year} {session.event['EventName']} Q3 Fast Lap Comparison\n"
+             f"{driver_1_name} vs {driver_2_name}", fontdict=title_font_black)
+    
+    ax[1].plot(driver_1_tele['Distance'], driver_1_tele['Throttle'], color = driver_1_colour)
+    ax[1].plot(driver_2_tele['Distance'], driver_2_tele['Throttle'], color = driver_2_colour)
+    
+    ax[1].set_ylabel('Throttle Pressure %', color = "white")
+    
+    ax[2].plot(driver_1_tele['Distance'], driver_1_tele['RPM'], color = driver_1_colour)
+    ax[2].plot(driver_2_tele['Distance'], driver_2_tele['RPM'], color = driver_2_colour)
+    
+    ax[2].set_ylabel('RPM', color = "white")
+    ax[2].set_xlabel('Distance in m', color = "white")
+    
+   
+    
+    plt.show()
     
 def inner_menu(index, event):
+    race = event.get_race()
+    quali = event.get_qualifying()
+    race.load()
+    quali.load()
+    
     if index == 1:
-        driver = input("Enter driver name: ")
-        race = event.get_race()
-        race.load()
+        driver = input("Enter driver number: ")
         plot_driver_race_laptime(race, driver)
+        
     if index == 2:
         driver1 = input("Enter driver 1 number: ")
         driver2 = input("Enter driver 2 number: ")
-        race = event.get_race()
-        race.load()
         plot_laptimes_comparison(race, driver1, driver2)
+        
     if index == 3:
         quali = event.get_qualifying()
-        quali.load()
         plot_q3_flying_laps(quali)
+        
+    if index == 4:
+        driver1 = input("Enter driver 1 number: ")
+        driver2 = input("Enter driver 2 number: ")
+        plot_telemetry_data(quali, driver1, driver2)
         
         
     

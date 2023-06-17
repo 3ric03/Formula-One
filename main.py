@@ -32,13 +32,18 @@ while not exit:
             
             
         if not bad_search:
-            load_race_event(searched_event)
-            print("\n1. View Race Laptimes")
-            print("2. Compare Race Laptimes")
-            print("3. Q3 Hotlaps")
-            
-            command2 = int(input("Enter command: "))
-            inner_menu(command2, searched_event)
+            while True:
+                load_race_event(searched_event)
+                print("\n1. View Race Laptimes")
+                print("2. Compare Race Laptimes")
+                print("3. Q3 Hotlaps")
+                print("4. Speed/Throttle/Brake Comparison")
+                print("5. Track Strength Comparison")
+                print("6. Exit to Main Menu")
+                command2 = int(input("Enter command: "))
+                if command2 == 6:
+                    break
+                inner_menu(command2, searched_event)
 
             
     ##elif command == 2:
