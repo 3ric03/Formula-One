@@ -1,7 +1,7 @@
 from search import Search_Info
 from datetime import datetime
-from menu_func import load_race_event
-from menu_func import inner_menu
+from plotting_funcs import load_race_event
+from plotting_funcs import inner_menu
 import fastf1
 
 print("Welcome to F1 App version 1.0\n")
