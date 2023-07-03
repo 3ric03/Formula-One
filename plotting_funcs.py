@@ -19,11 +19,8 @@ title_font_w = {'family':'serif','color':'white','size':17}
 mlt.rcParams['figure.facecolor'] = 'black'
 
 
-def load_race_event (searched_event):
-    race = searched_event.get_race()
-    quali = searched_event.get_qualifying()
-    race.load()
-    quali.load()
+def load_race_event (searched_event, race, quali):
+    
     winner = race.drivers[:1]
     pole = quali.drivers[:1]
     
@@ -101,7 +98,6 @@ def plot_laptimes_comparison (race, driver1, driver2):
     else:
         laps1 = race.laps.pick_driver(driver1).pick_quicklaps(1.40).reset_index()
         laps2 = race.laps.pick_driver(driver2).pick_quicklaps(1.40).reset_index()
- 
 
     lap_list1 = list()
     lap_list2 = list()
@@ -333,15 +329,8 @@ def plot_telemetry_data(session, driver1, driver2, command):
         plt.show()
        
         
-        
-
     
-def inner_menu(index, event):
-    race = event.get_race()
-    quali = event.get_qualifying()
-    race.load()
-    quali.load()
-    
+def plotting_menu(index, race, quali):
     if index == 1:
         driver = input("Enter driver number: ")
         plot_driver_race_laptime(race, driver)
@@ -352,7 +341,6 @@ def inner_menu(index, event):
         plot_laptimes_comparison(race, driver1, driver2)
         
     if index == 3:
-        quali = event.get_qualifying()
         plot_q3_flying_laps(quali)
         
     if index == 4 or index == 5:
