@@ -1,1 +1,1 @@
-<h> FORMULA ONE DATA ANALYSIS PROJECT </h>
+<font size="16">Formula One Data Analysis Project</font>
