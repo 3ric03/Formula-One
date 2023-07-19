@@ -32,8 +32,7 @@ def IRQ_filter(laps):
     
     laps.loc[laps['LapTimeSeconds'] < min_lap_time, 'LapTimeSeconds'] = np.nan
     laps.loc[laps['LapTimeSeconds'] > max_lap_time, 'LapTimeSeconds'] = np.nan
-    print(laps)
-    print("HEREEE")
+
     return laps
 
 def plot_setup (ax):
@@ -88,7 +87,7 @@ def practise_pace_plotter(fp1, fp2, drivers: list[int], tyre_compound): #need to
     for flier in box_plot['fliers']:
         flier.set(marker='o', color = 'white', alpha = 1)
         
-    medians = [np.mean(laptimes[i]) for i in range(len(laptimes))]
+    medians = [np.median(laptimes[i]) for i in range(len(laptimes))]
     
     for i, median in enumerate(medians):
         try:
@@ -153,7 +152,7 @@ def race_pace_plotter(race, drivers: list[int]): #use guide, do not consider tyr
     for flier in box_plot['fliers']:
         flier.set(marker='o', color = 'white', alpha = 1)
         
-    medians = [np.mean(laptimes[i]) for i in range(len(laptimes))]
+    medians = [np.median(laptimes[i]) for i in range(len(laptimes))]
     
     for i, median in enumerate(medians):
         median_formatted = seconds_to_time_delta(median)

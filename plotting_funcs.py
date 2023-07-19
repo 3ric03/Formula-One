@@ -19,6 +19,7 @@ title_font_w = {'family':'serif','color':'white','size':17}
 mlt.rcParams['figure.facecolor'] = 'black'
 
 
+
 def load_race_event (searched_event, race, quali):
     
     winner = race.drivers[:1]
@@ -144,7 +145,7 @@ def plot_laptimes_comparison (race, driver1, driver2):
     
 def plot_q3_flying_laps(quali):
     fastf1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme=None, misc_mpl_mods=False)
-    
+    plt.style.use('dark_background')
     q1, q2, q3 = quali.laps.split_qualifying_sessions()
     pole = quali.laps.pick_fastest()["LapTime"]
     top_drivers = quali.drivers[:6] #change back to 8
@@ -185,7 +186,7 @@ def plot_q3_flying_laps(quali):
     pole_time = strftimedelta(pole_lap['LapTime'], '%m:%s.%ms')
 
     plt.title(f"{quali.event['EventName']} {quali.event.year} Qualifying\n"
-             f"Pole Lap Time: {pole_time} ({pole_lap['Driver']})", fontdict=title_font_b)
+             f"Pole Lap Time: {pole_time} ({pole_lap['Driver']})", fontdict=title_font_w)
     
     plt.xlabel("Time Delta (Seconds)")
     plt.ylabel("Flying Laps")
