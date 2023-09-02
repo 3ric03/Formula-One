@@ -42,7 +42,7 @@ class App (customtk.CTk):
     frames = {}
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title("F1 data Analysis")
+        self.title("F1 Data Analysis")
         self.geometry("700x500")
         self.minsize(600,500)
         
