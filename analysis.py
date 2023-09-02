@@ -100,11 +100,6 @@ def practise_pace_plotter(fp1, fp2, drivers: list[int], tyre_compound): #need to
     
     plt.show()
 
-    
-    
-    
-    
-
 def race_pace_plotter(race, drivers: list[int]): #use guide, do not consider tyre compounds when displaying 
     
     driver_colours = []
@@ -175,21 +170,3 @@ def input_drivers() -> list[int]:
     drivers = user_input.split(' ')
     #drivers = [int(driver) for driver in drivers]
     return drivers
-        
-def analysis_menu (index, event,  race):
-    if index == 1:
-        fp1 = event.get_practice(1)
-        fp2 = event.get_practice(2)
-        fp1.load()
-        fp2.load()
-        drivers = input_drivers()
-        tyre_compound = tyre_dict[input("Enter the trye compound of interest (S/M/H): ")]
-        
-        practise_pace_plotter(fp1, fp2, drivers, tyre_compound)
-        
-    if index == 2:
-       drivers = input_drivers()
-       race_pace_plotter(race, drivers)
-        
-    if index == 3:
-        pass

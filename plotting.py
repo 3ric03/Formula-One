@@ -18,8 +18,6 @@ title_font_b = {'family':'serif','color':'black','size':17}
 title_font_w = {'family':'serif','color':'white','size':17}
 mlt.rcParams['figure.facecolor'] = 'black'
 
-
-
 def load_race_event (searched_event, race, quali):
     
     winner = race.drivers[:1]
@@ -328,27 +326,7 @@ def plot_telemetry_data(session, driver1, driver2, command):
         ax.legend(handles=legend_handles)
         
         plt.show()
-       
-        
-    
-def plotting_menu(index, race, quali):
-    if index == 1:
-        driver = input("Enter driver number: ")
-        plot_driver_race_laptime(race, driver)
-        
-    if index == 2:
-        driver1 = input("Enter driver 1 number: ")
-        driver2 = input("Enter driver 2 number: ")
-        plot_laptimes_comparison(race, driver1, driver2)
-        
-    if index == 3:
-        plot_q3_flying_laps(quali)
-        
-    if index == 4 or index == 5:
-        driver1 = input("Enter driver 1 number: ")
-        driver2 = input("Enter driver 2 number: ")
-        plot_telemetry_data(quali, driver1, driver2, index)
-    
+
         
         
     
