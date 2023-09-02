@@ -1,20 +1,13 @@
 # Formula One Race Data Analysis Project 🏎
+#### Made possible by the FastF1 API created by @theOehrly <br> User Interface created using [```CustomTkinter```](https://customtkinter.tomschimansky.com/documentation/) with Object Oriented Methodology <br><br> Tech Stack: <br> ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) 
 
-### Made possible by the FastF1 API created by @theOehrly <br> Libaries used: Pandas, Numpy, Matplotlib, Seaborn <br> User Interface created using CustomTkinter with Object Oriented Methodology
+This application uses data obtained from FastF1 to generate plots regarding laptimes, telemetry, track performance and more. It is avaliable for all 100+ Formula One Grand Prix since the 2018 Season. Interquartile Range Rule is used to omit outliers for laptimes.
+<br> Next up: Favourite Driver & Search History 
+<br><br>Demos are shown below ⬇
 
+#### Main Menu & Search UI
 
-Parses through race data obtained from FastF1 to generate plots regarding laptimes, telemetry, track performance and more. 
-Interquartile Range Rule is used to omit outliers for laptimes.
-<br>Some example plots are shown below ⬇⬇
-
-#### Main Menu UI
-
-<img src="https://github.com/3ric03/Formula-One/blob/main/png/main_menu.png" width="600px" height="300px">
-
-
-#### Driver & Tyre Selection UI
-
-
+<img src="https://github.com/3ric03/Formula-One/blob/main/png/main_menu2.png" width="500px" height="240px"> <img src="https://github.com/3ric03/Formula-One/blob/main/png/search_menu.png" width="500px" height="240px">
 
 #### Track dominance comparison:
 
