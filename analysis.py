@@ -11,7 +11,7 @@ import numpy as np
 title_font_b = {'family':'serif','color':'black','size':17}
 title_font_w = {'family':'serif','color':'white','size':17}
 axis_font_w = {'family':'serif','color':'white','size':13}
-tyre_dict = {'S': 'SOFT', 'M': 'MEDIUM', 'H' : "HARD"}
+tyre_dict = {'Soft Tyre': 'SOFT', 'Medium Tyre': 'MEDIUM', 'Hard Tyre' : "HARD"}
 compound_colour = {'HARD': '#f0f0ec', 'INTERMEDIATE': '#43b02a', 'MEDIUM': '#ffd12e', 'SOFT': '#da291c', 'TEST-UNKNOWN': '#434649', 'UNKNOWN': '#00ffff', 'WET': '#0067ad'}
 # Make plot a bit bigger
 

@@ -1,13 +1,14 @@
 from search import Search_Info
-from datetime import datetime
-from plotting import load_race_event
 
 from plotting import plot_driver_race_laptime
 from plotting import plot_laptimes_comparison
 from plotting import plot_q3_flying_laps
 from plotting import plot_telemetry_data
 
-from analysis import analysis_menu
+from analysis import practise_pace_plotter
+from analysis import tyre_dict
+from analysis import race_pace_plotter
+
 import fastf1
 
 import customtkinter as customtk
@@ -21,9 +22,12 @@ customtk.set_appearance_mode("dark")
 customtk.set_default_color_theme("dark-blue")
 
 entry_width = 300
+entry_width_narrow = 245
 button_width = 90
+analysis = False
 race = None
 quali = None
+searched_event = None
 plotType = -1
 
 def load_gp (search_info):
@@ -53,12 +57,18 @@ class App (customtk.CTk):
         self.frames[1] = RaceSearch(self)
         self.frames[2] = PlottingMenu(self)
         self.frames[3] = DriveSearch(self)
+        self.frames[4] = AnalysisMenu(self)
     
     def display_frame(self, frame_num):
         if hasattr(self, "current_frame"):
             self.current_frame.pack_forget()  # Hide the current frame
+            if self.current_frame == App.frames[3]:
+                for widget in self.current_frame.winfo_children():
+                    widget.destroy()
         
         self.current_frame = App.frames[frame_num]  # Set the current frame to the new frame
+        if frame_num == 3:
+            self.current_frame.create_widgets()
         self.current_frame.pack(fill="both", expand=True)    # Show the new frame
         
         
@@ -76,7 +86,7 @@ class RaceSearch(customtk.CTkFrame):
         location = name_entry.get()
         
         search_obj = Search_Info(year, location, " ")
-        searched_event = None
+        global searched_event
         bad_search = False
         try:
             searched_event = fastf1.get_event(search_obj._year, search_obj._location)
@@ -87,7 +97,11 @@ class RaceSearch(customtk.CTkFrame):
             
         if not bad_search:
             load_gp(searched_event)
-            self.master.display_frame(2)
+            if analysis:
+                print("reached")
+                self.master.display_frame(4)
+            else:
+                self.master.display_frame(2)
             
         
     def create_widgets(self, parent):
@@ -108,37 +122,81 @@ class RaceSearch(customtk.CTkFrame):
         self.search_button.place(x=360, y=175)
 
 class DriveSearch(customtk.CTkFrame):
+    chosen_tyre = None
+    tyre_selector = None
     def __init__(self, parent):
         super().__init__(parent)
-        self.create_widgets(parent)
+        
     
     def process_search(self, driver_entry):
+        
         inputValue = driver_entry.get().split()
         if plotType == 1:
             plot_driver_race_laptime(race, (inputValue[0]))
+            
         elif plotType == 2:
             plot_laptimes_comparison(race, inputValue[0], inputValue[1])
+            
         elif plotType == 4 or plotType == 5:
             plot_telemetry_data(quali, inputValue[0], inputValue[1], plotType)
             
+        elif plotType == 6:
+            fp1 = searched_event.get_practice(1)
+            fp2 = searched_event.get_practice(2)
+            fp1.load()
+            fp2.load()
+            self.select_tyre()
+            tyre = tyre_dict[self.chosen_tyre]
+            practise_pace_plotter(fp1, fp2, inputValue, tyre)
+            
+        elif plotType == 7:
+            race_pace_plotter(race, inputValue)
+            
+            
     def return_to_prev(self):
-        self.master.display_frame(2)
+        if plotType == 6 or plotType == 7:
+            self.master.display_frame(4)
+        else:
+            self.master.display_frame(2)
+    def select_tyre(self):
+        self.chosen_tyre = self.tyre_selector.get()
+        print(self.chosen_tyre)
+    
+    def create_widgets(self):
+        tyre_select = False
         
-    def create_widgets(self, parent):
-        if plotType == 1:
+        if plotType == 6 or plotType == 7:
+            if plotType == 6:
+                tyre_select = True
+            number = 4
+        elif plotType == 1:
             number = 1
         else:
             number = 2
-            
-        self.title = customtk.CTkLabel(self, text="Driver Search", font=("Helvetica", 20), compound="left").pack(pady=20)
-        self.driver_entry = customtk.CTkEntry(self, placeholder_text="Enter " + str(number) + " Drivers", width=entry_width)
+        
+        if tyre_select:
+            title = "Driver & Tyre Selection"
+        else:
+            title = "Driver Selection"
+        
+        self.title = customtk.CTkLabel(self, text=title, font=("Helvetica", 20), compound="left").pack(pady=20)
+        
+        self.driver_entry = customtk.CTkEntry(self, placeholder_text="Enter " + str(number) + " Driver Numbers:", width=entry_width_narrow)
         self.driver_entry.pack(pady=10)
         
         self.search_button = customtk.CTkButton(self, text="Process", width = button_width, command = lambda: self.process_search(self.driver_entry))
-        self.search_button.place(x=370, y=130)
-        
         self.back_button = customtk.CTkButton(self, text="Back", width = button_width, command = self.return_to_prev)
-        self.back_button.place(x=250, y=130)
+
+        
+        if tyre_select:
+            self.tyre_selector = customtk.CTkSegmentedButton(self, 
+                                     values=["Soft Tyre", "Medium Tyre", "Hard Tyre"])
+            self.tyre_selector.pack(pady=10)
+            self.search_button.place(x=365, y=180)
+            self.back_button.place(x=245, y=180)
+        else:
+            self.search_button.place(x=370, y=130)
+            self.back_button.place(x=250, y=130)
         
     
 class PlottingMenu(customtk.CTkFrame):
@@ -156,6 +214,7 @@ class PlottingMenu(customtk.CTkFrame):
         
     def view_hotlaps(self):
         plot_q3_flying_laps(quali)
+        
     def create_widgets(self, parent):
         button_width = 300
         customtk.CTkLabel(self, text="Plotting Menu", font=("Helvetica", 20), compound="left").pack(pady=10)
@@ -189,10 +248,38 @@ class PlottingMenu(customtk.CTkFrame):
         
     
         
+class AnalysisMenu(customtk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.create_widgets(parent)
+    
+    def return_to_prev (self):
+        self.master.display_frame(1)
+        
+    def display_plots (self, index):
+        global plotType
+        plotType = index
+        self.master.display_frame(3)
+        
+        
+    def create_widgets(self, parent):
+        button_width = 300
+        customtk.CTkLabel(self, text="Analysis Menu", font=("Helvetica", 20), compound="left").pack(pady=10)
+        
+        btn_fp_analysis = customtk.CTkButton(self, text="Race Pace Analysis - Free Practise", width=button_width, 
+                                               command = lambda: self.display_plots(6))
+        btn_fp_analysis.pack(pady=5)
 
-        
-        
-        
+        btn_race_analysis = customtk.CTkButton(self, text="Race Pace Analysis - Race", width=button_width,
+                                                  command = lambda: self.display_plots(7))
+        btn_race_analysis.pack(pady=5)
+
+        btn_tyre_deg = customtk.CTkButton(self, text="Tyre Degradation Analysis (Coming Soon)", width=button_width,
+                                                  state="disabled")
+        btn_tyre_deg.pack(pady=5)
+
+        btn_exit = customtk.CTkButton(self, text="Back", command=self.return_to_prev, width=button_width)
+        btn_exit.pack(pady=10)
         
         
 class MainMenu(customtk.CTkFrame):
@@ -204,6 +291,8 @@ class MainMenu(customtk.CTkFrame):
         
     def open_visualization(self, parent):
         # Code to open Race Data Visualization page
+        global analysis
+        analysis = False
         self.pack_forget()
         self.master.display_frame(1)
 
@@ -214,7 +303,9 @@ class MainMenu(customtk.CTkFrame):
             customtk.set_appearance_mode("light")
     def open_analysis(self):
         # Code to open Race Data Analysis page
-        pass
+        global analysis
+        analysis = True
+        self.master.display_frame(1)
 
     def open_past_search(self):
         # Code to open View past search page
@@ -246,7 +337,7 @@ class MainMenu(customtk.CTkFrame):
         btn_exit = customtk.CTkButton(self, text="Exit", command=self.exit_program, width=button_width)
         btn_exit.pack(pady=10)
         
-        toggle_display_mode = customtk.CTkSwitch(self, switch_height=15, switch_width=40, text = "Dark Mode", 
+        toggle_display_mode = customtk.CTkSwitch(self, switch_height=15, switch_width=40, text = "Light Mode", 
                                                  command=lambda: self.toggle_light_mode(toggle_display_mode) )
         toggle_display_mode.pack(pady=10)
         
