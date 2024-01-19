@@ -1,5 +1,5 @@
-from format_time import format_laptime
-from format_time import format_time_delta
+from src.format_time import format_laptime
+from src.format_time import format_time_delta
 import fastf1
 import fastf1.plotting
 import seaborn as sns

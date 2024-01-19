@@ -4,8 +4,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
 from matplotlib import cm
-from format_time import seconds_to_time_delta
-from tyre_data_parser import race_tyre_types
+from src.format_time import seconds_to_time_delta
+from src.tyre_data_parser import race_tyre_types
 import numpy as np
 
 title_font_b = {'family':'serif','color':'black','size':17}
